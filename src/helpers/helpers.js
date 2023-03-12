@@ -1,13 +1,14 @@
 import axios from 'axios'
 import store from '../store'
+import router from "@/router";
 
-export const getToken = () => localStorage.getItem('token')
+export const getToken = () => localStorage.getItem('token-bot')
 
 export const setToken = token => {
-  localStorage.setItem('token', token)
+  localStorage.setItem('token-bot', token)
 }
 export const removeToken = () => {
-  localStorage.removeItem('token')
+  localStorage.removeItem('token-bot')
 }
 export const getDarkTheme = () => localStorage.getItem('dark_theme')
 export const setDarkTheme = theme => {
@@ -19,7 +20,8 @@ export const getAxios = url => {
     method: 'GET',
     url,
     headers: {
-        "Access-Control-Allow-Origin": "true"
+        'Content-Type': 'application/json',
+        Authorization: `Bearer_${getToken()}`,
     },
   }).then(r => {
     // store.state.loading = false
@@ -30,34 +32,19 @@ export const getAxios = url => {
       })
 }
 export const postAxios = (url, payload, snackbars) => {
-  store.state.loading = true
-  store.state.error = false
+
   return axios({
     method: 'POST',
     url,
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${getToken()}`,
+      Authorization: `Bearer_${getToken()}`,
     },
     data: payload,
   }).then(r => {
-    store.state.loading = false
-    store.commit('setSnackbars', 'Успешно добавлено')
     return r.data
   })
-      .catch(e => {
-        store.state.loading = false
-        if (snackbars) {
-          store.commit('setSnackbars', snackbars)
-          return
-        }
-        if (e.response) {
-          store.commit('setSnackbars', e.response.data)
-          return
-        }
-        store.commit('setError')
-        store.commit('setSnackbars', e.message)
-      })
+
 }
 export const postWithoutSnack = (url, payload) => {
   store.state.loading = true
@@ -178,4 +165,18 @@ export const deleteAxios = (url, payload) => {
         store.commit('setSnackbars', e.message)
       })
 }
+export async function logOut() {
+  await router.push({ name: 'login' })
+  removeToken()
+}
 
+// eslint-disable-next-line consistent-return
+export function decodeJWT() {
+  if (getToken()) {
+    const base64Url = getToken().split('.')[1]
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => `%${(`00${c.charCodeAt(0).toString(16)}`).slice(-2)}`).join(''))
+
+    return JSON.parse(jsonPayload)
+  }
+}

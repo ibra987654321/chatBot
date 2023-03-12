@@ -3,12 +3,15 @@
     <div id="messages" class="messages">
       <div class="time">Сегодня</div>
       <div
-          v-for="(message, idx) in messages"
+          v-for="(message, idx) in $store.state.messages"
           :key="idx"
           class="msg-text"
-          :class="message.author === 'owner' ? 'owner' : ''"
+          :class="message.author === 'owner' ? 'owner' : '' || message.conversationMessages > 0 ? 'button_choice' : ''"
       >
-        <span class="text">{{message.text}}</span>
+        <span class="text" v-if="message.text">{{message.text}}</span>
+        <div style="margin-top: 20px" v-if="message.conversationMessages">
+          <button class="btn"  v-for="(item, idx) in message.conversationMessages" :key="idx" @click="getNextMessage(item.id)">{{item.title}}</button>
+        </div>
       </div>
     </div>
     <div class="field">
@@ -40,27 +43,48 @@
 export default {
   name: "Chats",
   data:() => ({
-    messages: [
-      {author: 'bot', text: 'Hello'},
-      {author: 'bot', text: 'How are you doing?'},
-      {author: 'owner', text: 'Fine'},
-      {author: 'owner', text: 'You?'},
-      {author: 'bot', text: 'Good'},
-    ],
+    messages: [],
     messageText: ''
   }),
   mounted() {
-    this.$store.dispatch('getButtonMessages')
+    this.$store.dispatch('getButtonMessages', 1)
         .then(r => {
-          console.log(r)
+          this.$store.state.messages.push({
+            author: 'bot',
+            text: r.message,
+            conversationMessages: r.conversationMessages
+          })
         })
   },
   methods: {
-    sendMessage() {
-      this.messages.push(
+    async sendMessage() {
+      this.$store.state.messages.push(
           {author: 'owner', text: this.messageText},
       )
-      this.messageText = ''
+      await this.$store.dispatch('searchKeyWords', { keyWords: this.messageText})
+          .then(r => {
+            this.$store.state.messages.push({
+              author: 'bot',
+              text: '',
+              conversationMessages: r
+            })
+            this.messageText = ''
+          })
+    },
+    getNextMessage(id) {
+       this.$store.state.messages.map(i => {
+         if (i.conversationMessages) {
+           const item = i.conversationMessages.find(r => r.id === id)
+           if (item !== undefined) {
+             this.$store.state.messages.push({author: 'owner', text: item.title})
+           }
+         }
+        delete i.conversationMessages
+      })
+      this.$store.dispatch('getButtonMessages', id)
+          .then(r => {
+            this.$store.state.messages.push({author: 'bot', text: r.message, conversationMessages: r.conversationMessages})
+          })
     }
   }
 }
@@ -70,5 +94,19 @@ export default {
 .chat {
   display: flex;
   flex-direction: column;
+}
+.position {
+  position: absolute;
+  top: 55px;
+}
+.btn {
+  cursor: pointer;
+  padding:0.75em;
+  border-radius:0.75em 0.75em 0.75em 0.75em;
+  background: #09db84;
+  color: white;
+  border: none;
+  margin-right: 10px;
+  box-shadow:0 2px 0 #00000020;
 }
 </style>

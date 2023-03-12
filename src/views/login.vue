@@ -3,16 +3,16 @@
     <div class="container a-container" id="a-container">
       <form class="form" id="a-form" method="" action="">
         <h2 class="form_title title">Создать аккаунт</h2>
-        <input class="form__input" type="text" placeholder="ИНН">
-        <input class="form__input" type="text" placeholder="Почта">
+        <input class="form__input" v-model="$store.state.register.personalNumber" type="text" placeholder="ИНН">
+        <input class="form__input" v-model="$store.state.register.email" type="text" placeholder="Почта">
         <button class="form__button button submit" @click="getButtons($event, 'sign-up')">ЗАРЕГИСТРИРОВАТЬСЯ</button>
       </form>
     </div>
     <div class="container b-container" id="b-container">
       <form class="form" id="b-form" method="" action="">
         <h2 class="form_title title">Войти в систему</h2>
-        <input class="form__input" type="text" placeholder="ИНН">
-        <input class="form__input" type="password" placeholder="Пароль">
+        <input class="form__input" v-model="$store.state.login.username" type="text" placeholder="ИНН">
+        <input class="form__input" v-model="$store.state.login.password" type="password" placeholder="Пароль">
         <a class="form__link">Забыли пароль?</a>
         <button class="form__button button submit" @click="getButtons($event, 'sign-in')">ВОЙТИ</button>
       </form>
@@ -24,6 +24,7 @@
         <h2 class="switch__title title">Добро пожаловать !</h2>
         <p class="switch__description description">Если у Вас уже есть аккаунт, пожалуйста, войдите</p>
         <button class="switch__button button switch-btn" @click="changeForm()">ВОЙТИ</button>
+        <modal/>
       </div>
       <div class="switch__container is-hidden" id="switch-c2">
         <h2 class="switch__title title">Привет, друг ! </h2>
@@ -35,17 +36,32 @@
 </template>
 
 <script>
+import modal from "@/components/modal";
 export default {
   name: "login",
+  components: {
+    modal
+  },
+  data:() => ({
+    login: {
+      username: '',
+      password: ''
+    },
+    register: {
+      personalNumber: "",
+      email: ""
+    }
+  }),
   mounted() {
+
   },
   methods: {
     getButtons(e, type) {
       e.preventDefault()
       if (type === 'sign-in') {
-        this.$router.push({name: 'home'})
+        this.$store.dispatch('login', this.$store.state.login)
       } else {
-        console.log('sign-up')
+        this.$store.dispatch('register', this.$store.state.register)
       }
     },
     changeForm() {

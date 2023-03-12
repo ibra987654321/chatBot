@@ -1,7 +1,8 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import {getAxios} from "@/helpers/helpers";
+import {decodeJWT, getAxios, postAxios, setToken} from "@/helpers/helpers";
 import axios from "axios";
+import router from "@/router";
 
 Vue.use(Vuex)
 
@@ -9,18 +10,52 @@ export default new Vuex.Store({
   state: {
     messages: [],
     loading: false,
+    modal: false,
+    login: {
+      username: '',
+      password: ''
+    },
+    register: {
+      personalNumber: "",
+      email: ""
+    }
   },
   getters: {
   },
   mutations: {
   },
   actions: {
-    getButtonMessages() {
-      return axios(`http://10.16.230.114:8060/chatbot/api/conversation_message/get/1`, {
-        method: 'GET',
-      }).then(r => r)
-      // return getAxios('http://10.16.230.114:8060/chatbot/api/conversation_message/get/1')
-    }
+    login(_, payload) {
+      return axios(`http://176.126.164.43:88/chatbot/api/user/login`, {
+        method: 'POST',
+        data: payload,
+      })
+          .then(res => {
+            if (res.data.token) {
+              setToken(res.data.token)
+              router.push({ name: 'home' })
+            }
+          })
+    },
+    register(store, payload) {
+      return axios(`http://176.126.164.43:88/chatbot/api/user/registration`, {
+        method: 'POST',
+        data: payload,
+      })
+          .then(() => {
+            store.state.modal = true
+          })
+    },
+    getButtonMessages(_, payload) {
+      const data = {
+        "messageResponse_id": payload,
+        "personal_number": Number(decodeJWT().sub)
+      }
+      return postAxios('http://176.126.164.43:88/chatbot/api/conversation_message/get/conversationMessage', data)
+    },
+    searchKeyWords(_, payload) {
+      return postAxios('http://176.126.164.43:88/chatbot/api/conversation_message/get/keyWords', payload)
+    },
   },
   modules: {
   }

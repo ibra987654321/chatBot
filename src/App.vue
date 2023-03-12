@@ -5,15 +5,9 @@
 </template>
 <script>
 
-import ChatBox from "@/components/ChatBox";
-import Message from "@/components/Message";
 
 export default {
   name: 'App',
-  components: {
-    ChatBox,
-    Message
-  },
   created() {
   },
   methods: {

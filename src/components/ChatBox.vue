@@ -64,7 +64,9 @@ hr{
   border:none;
   background:#00000020;
 }
-
+.button_choice{
+  height: 70px;
+}
 .icon{
   cursor:pointer;
   transition:all ease 0.5s;
@@ -106,13 +108,15 @@ hr{
     width:fit-content;
     min-width:var(--size);
     min-height:var(--size);
-
     position:absolute;
     right:0;
     bottom:0;
-
+    z-index: 9;
     background:#09db84;
     border-radius:50%;
+    img {
+      overflow: hidden;
+    }
   }
 }
 
@@ -210,7 +214,7 @@ hr{
       .msg-text{
         width:fit-content;
         font-size:0.85em;
-
+        margin-bottom: 15px;
         animation:appear-msg ease 0.25s forwards;
 
         .text{
