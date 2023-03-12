@@ -25,12 +25,14 @@ export default new Vuex.Store({
   mutations: {
   },
   actions: {
-    login(_, payload) {
+    login(store, payload) {
+      store.state.loading = true
       return axios(`http://176.126.164.43:88/chatbot/api/user/login`, {
         method: 'POST',
         data: payload,
       })
           .then(res => {
+            store.state.loading = false
             if (res.data.token) {
               setToken(res.data.token)
               router.push({ name: 'home' })
@@ -38,11 +40,13 @@ export default new Vuex.Store({
           })
     },
     register(store, payload) {
+      store.state.loading = true
       return axios(`http://176.126.164.43:88/chatbot/api/user/registration`, {
         method: 'POST',
         data: payload,
       })
           .then(() => {
+            store.state.loading = false
             store.state.modal = true
           })
     },
