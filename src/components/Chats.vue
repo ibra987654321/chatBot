@@ -8,7 +8,10 @@
           class="msg-text"
           :class="message.author === 'owner' ? 'owner' : '' || message.conversationMessages > 0 ? 'button_choice' : ''"
       >
-        <span class="text" v-if="message.text">{{message.text}}</span>
+        <span class="text" v-if="message.text">
+          <a v-if="regex(message.text)" target="_blank" href="https://gik.kg/ru/">{{message.text}}</a>
+          <div v-else>{{message.text}}</div>
+        </span>
         <div style="margin-top: 20px" v-if="message.conversationMessages">
           <button class="btn"  v-for="(item, idx) in message.conversationMessages" :key="idx" @click="getNextMessage(item.id)">{{item.title}}</button>
         </div>
@@ -85,6 +88,11 @@ export default {
           .then(r => {
             this.$store.state.messages.push({author: 'bot', text: r.message, conversationMessages: r.conversationMessages})
           })
+    },
+    regex(text) {
+      const link = text.match(/https/)
+      return link !== null;
+
     }
   }
 }
